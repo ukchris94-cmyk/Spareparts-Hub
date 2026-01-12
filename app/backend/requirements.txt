@@ -1,0 +1,32 @@
+Collecting httpx
+  Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Collecting bcrypt
+  Downloading bcrypt-5.0.0-cp39-abi3-macosx_10_12_universal2.whl (495 kB)
+Collecting python-jose
+  Downloading python_jose-3.5.0-py2.py3-none-any.whl (34 kB)
+Collecting passlib
+  Downloading passlib-1.7.4-py2.py3-none-any.whl (525 kB)
+Collecting idna
+  Downloading idna-3.11-py3-none-any.whl (71 kB)
+Collecting anyio
+  Downloading anyio-4.12.1-py3-none-any.whl (113 kB)
+Collecting httpcore==1.*
+  Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Collecting certifi
+  Downloading certifi-2026.1.4-py3-none-any.whl (152 kB)
+Collecting h11>=0.16
+  Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Collecting rsa!=4.1.1,!=4.4,<5.0,>=4.0
+  Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+Collecting pyasn1>=0.5.0
+  Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+Collecting ecdsa!=0.15
+  Downloading ecdsa-0.19.1-py2.py3-none-any.whl (150 kB)
+Collecting six>=1.9.0
+  Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Collecting typing_extensions>=4.5
+  Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Collecting exceptiongroup>=1.0.2
+  Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+Installing collected packages: typing-extensions, six, pyasn1, idna, h11, exceptiongroup, certifi, rsa, httpcore, ecdsa, anyio, python-jose, passlib, httpx, bcrypt
+Successfully installed anyio-4.12.1 bcrypt-5.0.0 certifi-2026.1.4 ecdsa-0.19.1 exceptiongroup-1.3.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.11 passlib-1.7.4 pyasn1-0.6.1 python-jose-3.5.0 rsa-4.9.1 six-1.17.0 typing-extensions-4.15.0

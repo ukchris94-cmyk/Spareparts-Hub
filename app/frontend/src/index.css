@@ -1,0 +1,148 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 240 6% 4%;
+        --foreground: 0 0% 98%;
+        --card: 240 5% 10%;
+        --card-foreground: 0 0% 98%;
+        --popover: 240 5% 10%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 38 92% 50%;
+        --primary-foreground: 0 0% 0%;
+        --secondary: 240 4% 16%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 4% 16%;
+        --muted-foreground: 240 5% 65%;
+        --accent: 217 91% 60%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 62% 50%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 4% 16%;
+        --input: 240 4% 16%;
+        --ring: 38 92% 50%;
+        --radius: 0.25rem;
+        --chart-1: 38 92% 50%;
+        --chart-2: 217 91% 60%;
+        --chart-3: 142 71% 45%;
+        --chart-4: 0 62% 50%;
+        --chart-5: 280 65% 60%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground font-sans antialiased;
+        font-family: 'Public Sans', sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Chivo', sans-serif;
+        @apply tracking-tight;
+    }
+}
+
+/* Mono font for SKUs, prices, IDs */
+.font-mono {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Label styling */
+.label-text {
+    @apply uppercase tracking-widest text-xs font-bold text-zinc-400;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-zinc-900;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-zinc-700 rounded-sm;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-600;
+}
+
+/* Noise texture overlay */
+.noise-bg {
+    position: relative;
+}
+
+.noise-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E\");
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Button press effect */
+.btn-press:active {
+    transform: scale(0.98);
+}
+
+/* Glow effect */
+.glow-amber {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+}
+
+/* Status badges */
+.status-online {
+    @apply bg-green-500/10 text-green-500 border border-green-500/20;
+}
+
+.status-busy {
+    @apply bg-amber-500/10 text-amber-500 border border-amber-500/20;
+}
+
+.status-offline {
+    @apply bg-red-500/10 text-red-500 border border-red-500/20;
+}
+
+/* Page transition */
+.page-enter {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 200ms, transform 200ms;
+}
+
+/* Card hover effect */
+.card-hover {
+    @apply transition-colors duration-200;
+}
+
+.card-hover:hover {
+    @apply border-zinc-700;
+}
+
+/* Hide spin buttons on number input */
+input[type=\"number\"]::-webkit-inner-spin-button,
+input[type=\"number\"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=\"number\"] {
+    -moz-appearance: textfield;
+}
