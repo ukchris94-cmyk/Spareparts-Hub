@@ -1,0 +1,23 @@
+name: Backend Deployment Guide
+
+# This workflow doesn't actually deploy, it's a reminder
+# Backend needs to be deployed separately (Railway, Render, etc.)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Backend Deployment Reminder
+        run: |
+          echo "⚠️  Backend cannot be deployed to GitHub Pages"
+          echo ""
+          echo "Please deploy the backend to one of these platforms:"
+          echo "  - Railway: https://railway.app"
+          echo "  - Render: https://render.com"
+          echo "  - Heroku: https://heroku.com"
+          echo "  - Fly.io: https://fly.io"
+          echo ""
+          echo "After deployment, update VITE_BACKEND_URL in GitHub Secrets"

@@ -1,2 +1,32 @@
+# Dependencies
 /app/frontend/node_modules
 /app/backend/env
+/app/backend/.venv
+/app/backend/__pycache__
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
+/app/backend/.env
+/app/frontend/.env
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+/app/frontend/dist
+/app/frontend/build
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# OS
+.DS_Store
+Thumbs.db
