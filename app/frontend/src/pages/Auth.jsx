@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Select, SelectContent, SelectItem, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { Package, Eye, EyeOff, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
@@ -232,6 +232,12 @@ export function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Prevent multiple submissions
+    if (loading) {
+      return;
+    }
     
     if (!validateForm()) {
       toast.error('Please fix the errors in the form');
@@ -249,15 +255,24 @@ export function RegisterPage() {
       };
       
       const user = await register(submitData);
-      toast.success(`Welcome to SpareParts Hub, ${user.full_name}!`);
-      navigate('/dashboard');
+      
+      if (user) {
+        toast.success(`Welcome to SpareParts Hub, ${user.full_name}!`);
+        // Navigate after successful registration
+        navigate('/dashboard', { replace: true });
+      }
     } catch (error) {
+      console.error('Registration error:', error);
       const errorMessage = error.response?.data?.detail || 'Registration failed. Please try again.';
       toast.error(errorMessage);
       
       // Handle specific error cases
-      if (error.response?.status === 400 && errorMessage.includes('Email')) {
-        setErrors({ email: 'This email is already registered' });
+      if (error.response?.status === 400) {
+        if (errorMessage.includes('Email') || errorMessage.includes('email')) {
+          setErrors({ email: 'This email is already registered' });
+        } else if (errorMessage.includes('Business name')) {
+          setErrors({ business_name: errorMessage });
+        }
       }
     } finally {
       setLoading(false);
@@ -325,14 +340,15 @@ export function RegisterPage() {
           <form onSubmit={handleSubmit} className= "space-y-4 ">
             <div className= "space-y-2 ">
               <Label htmlFor= "role " className= "label-text ">I am a</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger className= "bg-black/20 border-zinc-800 h-12 " data-testid= "register-role ">
-                  <SelectValue placeholder= "Select role " />
-                </SelectTrigger>
-                <SelectContent className= "bg-zinc-900 border-zinc-800 ">
-                  <SelectItem value= "client ">Mechanic (Client)</SelectItem>
-                  <SelectItem value= "vendor ">Spare Parts Vendor</SelectItem>
-                  <SelectItem value= "dispatcher ">Dispatcher/Driver</SelectItem>
+              <Select 
+                value={formData.role} 
+                onValueChange={(value) => setFormData({ ...formData, role: value })}
+                className="bg-black/20 border-zinc-800 h-12"
+              >
+                <SelectContent>
+                  <SelectItem value="client">Mechanic (Client)</SelectItem>
+                  <SelectItem value="vendor">Spare Parts Vendor</SelectItem>
+                  <SelectItem value="dispatcher">Dispatcher/Driver</SelectItem>
                 </SelectContent>
               </Select>
             </div>

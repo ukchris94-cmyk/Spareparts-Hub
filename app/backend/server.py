@@ -17,10 +17,29 @@ import httpx
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# Configure logging FIRST
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+db_name = os.environ.get('DB_NAME', 'spareparts_hub')
+
+# Initialize MongoDB client with connection pooling
+client = AsyncIOMotorClient(
+    mongo_url,
+    serverSelectionTimeoutMS=5000,
+    connectTimeoutMS=5000,
+    socketTimeoutMS=5000,
+    maxPoolSize=50,
+    minPoolSize=10
+)
+db = client[db_name]
+logger.info(f"MongoDB client initialized. URL: {mongo_url}, Database: {db_name}")
 
 # JWT Configuration
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
@@ -41,6 +60,8 @@ api_router = APIRouter(prefix="/api")
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Initialize logger before MongoDB connection
 
 # ============= MODELS =============
 
@@ -212,49 +233,69 @@ def require_roles(allowed_roles: List[str]):
 
 @api_router.post("/auth/register", response_model=TokenResponse)
 async def register(user_data: UserCreate):
-    # Validate role
-    valid_roles = [UserRole.CLIENT, UserRole.VENDOR, UserRole.DISPATCHER]
-    if user_data.role not in valid_roles:
-        raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}")
-    
-    # Check if email already exists
-    existing = await db.users.find_one({"email": user_data.email})
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    # Validate business name for vendors
-    if user_data.role == UserRole.VENDOR and not user_data.business_name:
-        raise HTTPException(status_code=400, detail="Business name is required for vendors")
-    
-    # Normalize phone number (remove spaces, ensure +234 format)
-    phone = user_data.phone.replace(" ", "").replace("-", "")
-    if phone.startswith("0"):
-        phone = "+234" + phone[1:]
-    elif not phone.startswith("+234"):
-        phone = "+234" + phone
-    
-    user_id = str(uuid.uuid4())
-    user_doc = {
-        "id": user_id,
-        "email": user_data.email.lower().strip(),
-        "full_name": user_data.full_name.strip(),
-        "phone": phone,
-        "role": user_data.role,
-        "business_name": user_data.business_name.strip() if user_data.business_name else None,
-        "address": user_data.address.strip() if user_data.address else None,
-        "password_hash": get_password_hash(user_data.password),
-        "is_active": True,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    }
-    await db.users.insert_one(user_doc)
-    
-    access_token = create_access_token(data={"sub": user_id})
-    user_response = UserResponse(
-        id=user_id, email=user_doc["email"], full_name=user_doc["full_name"],
-        phone=user_doc["phone"], role=user_doc["role"], business_name=user_doc["business_name"],
-        address=user_doc["address"], created_at=user_doc["created_at"], is_active=True
-    )
-    return TokenResponse(access_token=access_token, user=user_response)
+    try:
+        # Validate role
+        valid_roles = [UserRole.CLIENT, UserRole.VENDOR, UserRole.DISPATCHER]
+        if user_data.role not in valid_roles:
+            raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}")
+        
+        # Validate business name for vendors
+        if user_data.role == UserRole.VENDOR and not user_data.business_name:
+            raise HTTPException(status_code=400, detail="Business name is required for vendors")
+        
+        # Normalize email for checking
+        email = user_data.email.lower().strip()
+        
+        # Check if email already exists
+        try:
+            existing = await db.users.find_one({"email": email})
+            if existing:
+                raise HTTPException(status_code=400, detail="Email already registered")
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Database error checking email: {e}")
+            raise HTTPException(status_code=500, detail="Database connection error. Please try again.")
+        
+        # Normalize phone number (remove spaces, ensure +234 format)
+        phone = user_data.phone.replace(" ", "").replace("-", "")
+        if phone.startswith("0"):
+            phone = "+234" + phone[1:]
+        elif not phone.startswith("+234"):
+            phone = "+234" + phone
+        
+        user_id = str(uuid.uuid4())
+        user_doc = {
+            "id": user_id,
+            "email": email,
+            "full_name": user_data.full_name.strip(),
+            "phone": phone,
+            "role": user_data.role,
+            "business_name": user_data.business_name.strip() if user_data.business_name else None,
+            "address": user_data.address.strip() if user_data.address else None,
+            "password_hash": get_password_hash(user_data.password),
+            "is_active": True,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+        
+        try:
+            await db.users.insert_one(user_doc)
+        except Exception as e:
+            logger.error(f"Database error inserting user: {e}")
+            raise HTTPException(status_code=500, detail="Failed to create user. Please try again.")
+        
+        access_token = create_access_token(data={"sub": user_id})
+        user_response = UserResponse(
+            id=user_id, email=user_doc["email"], full_name=user_doc["full_name"],
+            phone=user_doc["phone"], role=user_doc["role"], business_name=user_doc["business_name"],
+            address=user_doc["address"], created_at=user_doc["created_at"], is_active=True
+        )
+        return TokenResponse(access_token=access_token, user=user_response)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in register: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred. Please try again.")
 
 @api_router.post("/auth/login", response_model=TokenResponse)
 async def login(credentials: UserLogin):
@@ -759,6 +800,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_db_client():
+    try:
+        # Test the connection
+        await client.admin.command('ping')
+        logger.info("MongoDB connection established successfully")
+    except Exception as e:
+        logger.error(f"MongoDB connection failed: {e}")
+        logger.error("Please ensure MongoDB is running and MONGO_URL is correct")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+    logger.info("MongoDB connection closed")

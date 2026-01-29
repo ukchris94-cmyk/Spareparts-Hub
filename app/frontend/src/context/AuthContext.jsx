@@ -50,12 +50,20 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (userData) => {
-    const response = await authAPI.register(userData);
-    const { access_token, user: newUser } = response.data;
-    localStorage.setItem('token', access_token);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    setUser(newUser);
-    return newUser;
+    try {
+      const response = await authAPI.register(userData);
+      if (response?.data) {
+        const { access_token, user: newUser } = response.data;
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('user', JSON.stringify(newUser));
+        setUser(newUser);
+        return newUser;
+      }
+      throw new Error('Invalid response from server');
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
   };
 
   const value = {
