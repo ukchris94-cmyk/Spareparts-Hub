@@ -7,22 +7,34 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     
     if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-      // Verify token is still valid
-      authAPI.getMe()
-        .then(response => {
-          setUser(response.data);
-          localStorage.setItem('user', JSON.stringify(response.data));
-        })
-        .catch(() => {
-          logout();
-        })
-        .finally(() => setLoading(false));
+      try {
+        setUser(JSON.parse(savedUser));
+        // Verify token is still valid
+        authAPI.getMe()
+          .then(response => {
+            setUser(response.data);
+            localStorage.setItem('user', JSON.stringify(response.data));
+          })
+          .catch(() => {
+            logout();
+          })
+          .finally(() => setLoading(false));
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        logout();
+        setLoading(false);
+      }
     } else {
       setLoading(false);
     }
@@ -44,12 +56,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem('user', JSON.stringify(newUser));
     setUser(newUser);
     return newUser;
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
   };
 
   const value = {

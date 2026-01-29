@@ -43,6 +43,13 @@
     body {
         @apply bg-background text-foreground font-sans antialiased;
         font-family: 'Public Sans', sans-serif;
+        background-color: #09090B;
+        color: #FAFAFA;
+        margin: 0;
+        padding: 0;
+    }
+    #root {
+        min-height: 100vh;
     }
     h1, h2, h3, h4, h5, h6 {
         font-family: 'Chivo', sans-serif;

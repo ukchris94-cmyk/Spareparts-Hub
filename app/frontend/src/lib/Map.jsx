@@ -38,7 +38,7 @@ export function TrackingMap() {
   const [loading, setLoading] = useState(true);
 
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
   });
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export function TrackingMap() {
             <MapPin className= "h-16 w-16 mx-auto text-zinc-600 mb-4 " />
             <h2 className= "text-xl font-bold mb-2 ">Map Failed to Load</h2>
             <p className= "text-zinc-400 ">
-              Google Maps API key is required. Please configure REACT_APP_GOOGLE_MAPS_API_KEY.
+              Google Maps API key is required. Please configure VITE_GOOGLE_MAPS_API_KEY.
             </p>
           </CardContent>
         </Card>
@@ -195,7 +195,7 @@ export function DispatcherMap() {
   const [watchId, setWatchId] = useState(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
   });
 
   useEffect(() => {

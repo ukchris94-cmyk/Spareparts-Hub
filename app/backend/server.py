@@ -51,15 +51,15 @@ class UserRole:
     ADMIN = "admin"
 
 class UserBase(BaseModel):
-    email: EmailStr
-    full_name: str
-    phone: str
-    role: str = UserRole.CLIENT
-    business_name: Optional[str] = None
-    address: Optional[str] = None
+    email: EmailStr = Field(..., description="User email address")
+    full_name: str = Field(..., min_length=2, max_length=100, description="User's full name")
+    phone: str = Field(..., min_length=10, max_length=15, description="Phone number")
+    role: str = Field(default=UserRole.CLIENT, description="User role")
+    business_name: Optional[str] = Field(None, max_length=100, description="Business name (for vendors)")
+    address: Optional[str] = Field(None, max_length=200, description="User address")
 
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(..., min_length=6, description="Password (minimum 6 characters)")
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -212,19 +212,36 @@ def require_roles(allowed_roles: List[str]):
 
 @api_router.post("/auth/register", response_model=TokenResponse)
 async def register(user_data: UserCreate):
+    # Validate role
+    valid_roles = [UserRole.CLIENT, UserRole.VENDOR, UserRole.DISPATCHER]
+    if user_data.role not in valid_roles:
+        raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}")
+    
+    # Check if email already exists
     existing = await db.users.find_one({"email": user_data.email})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    # Validate business name for vendors
+    if user_data.role == UserRole.VENDOR and not user_data.business_name:
+        raise HTTPException(status_code=400, detail="Business name is required for vendors")
+    
+    # Normalize phone number (remove spaces, ensure +234 format)
+    phone = user_data.phone.replace(" ", "").replace("-", "")
+    if phone.startswith("0"):
+        phone = "+234" + phone[1:]
+    elif not phone.startswith("+234"):
+        phone = "+234" + phone
+    
     user_id = str(uuid.uuid4())
     user_doc = {
         "id": user_id,
-        "email": user_data.email,
-        "full_name": user_data.full_name,
-        "phone": user_data.phone,
+        "email": user_data.email.lower().strip(),
+        "full_name": user_data.full_name.strip(),
+        "phone": phone,
         "role": user_data.role,
-        "business_name": user_data.business_name,
-        "address": user_data.address,
+        "business_name": user_data.business_name.strip() if user_data.business_name else None,
+        "address": user_data.address.strip() if user_data.address else None,
         "password_hash": get_password_hash(user_data.password),
         "is_active": True,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -233,16 +250,27 @@ async def register(user_data: UserCreate):
     
     access_token = create_access_token(data={"sub": user_id})
     user_response = UserResponse(
-        id=user_id, email=user_data.email, full_name=user_data.full_name,
-        phone=user_data.phone, role=user_data.role, business_name=user_data.business_name,
-        address=user_data.address, created_at=user_doc["created_at"], is_active=True
+        id=user_id, email=user_doc["email"], full_name=user_doc["full_name"],
+        phone=user_doc["phone"], role=user_doc["role"], business_name=user_doc["business_name"],
+        address=user_doc["address"], created_at=user_doc["created_at"], is_active=True
     )
     return TokenResponse(access_token=access_token, user=user_response)
 
 @api_router.post("/auth/login", response_model=TokenResponse)
 async def login(credentials: UserLogin):
-    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
-    if not user or not verify_password(credentials.password, user["password_hash"]):
+    # Normalize email (lowercase, strip whitespace)
+    email = credentials.email.lower().strip()
+    
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Check if user is active
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=403, detail="Account is deactivated. Please contact support.")
+    
+    # Verify password
+    if not verify_password(credentials.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
     access_token = create_access_token(data={"sub": user["id"]})
