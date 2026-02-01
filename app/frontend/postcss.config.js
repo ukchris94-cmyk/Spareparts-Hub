@@ -4,7 +4,7 @@
 //     autoprefixer: {},
 //   },
 // }
-
+// Fix: SyntaxError: Unexpected token 'export'
 module.exports = {
   plugins: {
     tailwindcss: {},
