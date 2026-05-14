@@ -195,9 +195,14 @@ export default function Landing() {
               <Package className= "h-6 w-6 text-amber-500 " />
               <span className= "font-bold ">SpareParts Hub</span>
             </div>
-            <p className= "text-sm text-zinc-400 ">
-              © 2024 SpareParts Hub. Port Harcourt, Nigeria.
-            </p>
+            <div className= "flex items-center gap-4 text-sm ">
+              <Link to="/privacy-policy" className="text-zinc-400 hover:text-amber-500 transition-colors">
+                Privacy Policy
+              </Link>
+              <p className= "text-zinc-400 ">
+                © 2024 SpareParts Hub. Port Harcourt, Nigeria.
+              </p>
+            </div>
           </div>
         </div>
       </footer>
