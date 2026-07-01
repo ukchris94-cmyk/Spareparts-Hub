@@ -6,6 +6,7 @@ import { CartProvider } from "./context/CartContext";
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import DeleteAccount from "./pages/DeleteAccount";
 import { LoginPage, RegisterPage } from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Parts from "./pages/Parts";
@@ -64,6 +65,7 @@ function AppRoutes() {
       {/* Public Routes */}
       <Route path="/" element={<Layout><Landing /></Layout>} />
       <Route path="/privacy-policy" element={<Layout><PrivacyPolicy /></Layout>} />
+      <Route path="/delete-account" element={<Layout><DeleteAccount /></Layout>} />
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
       

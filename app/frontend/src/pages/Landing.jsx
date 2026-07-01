@@ -199,6 +199,9 @@ export default function Landing() {
               <Link to="/privacy-policy" className="text-zinc-400 hover:text-amber-500 transition-colors">
                 Privacy Policy
               </Link>
+              <Link to="/delete-account" className="text-zinc-400 hover:text-amber-500 transition-colors">
+                Delete Account
+              </Link>
               <p className= "text-zinc-400 ">
                 © 2024 SpareParts Hub. Port Harcourt, Nigeria.
               </p>
