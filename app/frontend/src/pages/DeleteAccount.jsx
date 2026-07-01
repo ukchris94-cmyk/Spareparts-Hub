@@ -99,8 +99,8 @@ export default function DeleteAccount() {
               <CardTitle className="text-xl">Contact</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-zinc-300">
-              <p>Support email: support@sparepartshub.app</p>
-              <p>Support phone: +12365550199</p>
+              <p>Support email: sparepartshub607@gmail.com</p>
+              <p>Support phone: +234 707 151 4945</p>
               <p className="text-zinc-400">
                 Include enough detail for us to locate and verify your account before deletion.
               </p>
