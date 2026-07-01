@@ -175,10 +175,12 @@ function AppRoutes() {
 }
 
 function App() {
+  const basename = import.meta.env.BASE_URL === "/" ? "/" : import.meta.env.BASE_URL.replace(/\/$/, "");
+
   return (
     <AuthProvider>
       <CartProvider>
-        <BrowserRouter>
+        <BrowserRouter basename={basename}>
           <AppRoutes />
           <Toaster 
             position="top-right" 
