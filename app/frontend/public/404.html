@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <script>
-      sessionStorage.setItem(
+      window.sessionStorage.setItem(
         "redirect",
-        location.pathname + location.search + location.hash
+        window.location.pathname + window.location.search + window.location.hash
       );
-      location.replace("/");
+      window.location.replace("/");
     </script>
   </head>
   <body></body>

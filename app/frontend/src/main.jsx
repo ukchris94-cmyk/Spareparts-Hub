@@ -5,7 +5,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 
 const redirect = sessionStorage.getItem("redirect");
-if (redirect) {
+if (redirect && redirect !== window.location.pathname + window.location.search + window.location.hash) {
   sessionStorage.removeItem("redirect");
   window.history.replaceState(null, "", redirect);
 }
