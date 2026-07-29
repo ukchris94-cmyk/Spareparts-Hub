@@ -4,16 +4,20 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
+
   server: {
     port: 3000,
     open: true,
   },
-  base: process.env.VITE_BASE_PATH || '/',
+
+  base: '/',
+
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
